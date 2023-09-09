@@ -31,16 +31,22 @@ def generate_five_bullet_audio_summary(content: str) -> str:
 
 def generate_five_bullet_summary_text(transcript_text: str, summary_output_path: str) -> str:
     print("Now Summarizing")
-    transcript_summary = generate_five_bullet_audio_summary(transcript_text)
-    transcript_summ_tester = transcript_summary['choices'][0]['message']['content']
+    transcript_summary_text = None
+    if not os.path.isfile(summary_output_path):
+        transcript_summary = generate_five_bullet_audio_summary(transcript_text)
+        transcript_summary_text = transcript_summary['choices'][0]['message']['content']
+        
+        # print(transcript_summ_tester)
+        print("Now Saving Summary")
+        with open(summary_output_path, 'w') as f:
+            f.write(transcript_summary_text)
+        print("Done with 5 Bullet Summary")
+    else:
+        print("Summary already exists")
+        with open(summary_output_path, 'r') as f:
+            transcript_summary_text = f.read()
     
-    # print(transcript_summ_tester)
-    print("Now Saving Summary")
-    with open(summary_output_path, 'w') as f:
-        f.write(transcript_summ_tester)
-    print("Done with 5 Bullet Summary")
-
-    return transcript_summ_tester
+    return transcript_summary_text
 
 
 def generate_answer_general_query(content: str, query: str) -> str:
