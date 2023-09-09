@@ -41,7 +41,7 @@ pip install -r requirements.txt
 To run the basic frontend, use the `main.py` file in the `app` folder:
 
 ```
-python -m app.main
+python -m src/app/main.py
 ```
 
 
