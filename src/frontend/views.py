@@ -11,9 +11,12 @@ class MainApplication:
     def __init__(self, root):
         self.root = root
         self.root.title("Podcast Muse")
-        self.root.geometry("400x400")  # Set the initial size of the window
+        self.root.geometry("600x600")  # Set the initial size of the window
 
         self.transcript_text = None
+        self.loading = False
+        self.status_string = None
+        self.dot_count = 0
 
         self.init_ui()
 
@@ -46,6 +49,14 @@ class MainApplication:
     ########################################
     # Initial Summarization Flow
     ########################################
+    def start_loading_animation(self):
+        if self.loading:
+            self.dot_count += 1
+            self.dot_count = (self.dot_count + 1) % 4
+            self.status_string.set("Processing" + "." * self.dot_count)
+            self.root.after(300, self.start_loading_animation)
+
+
     def display_summary_result(self, summary_result):
         # Display the summary result in the UI
         self.summary_label = tk.Label(self.root, text=summary_result, justify='left')
@@ -71,19 +82,16 @@ class MainApplication:
     def upload_file(self):
         file_path = filedialog.askopenfilename()
         if file_path:
-            self.status_string.set("File Processing")
-            self.root.update_idletasks()
+            self.loading = True
+            self.status_string.set("Processing")
+            self.start_loading_animation()
 
             base_file_path = os.path.join(os.getcwd(), "resources", "output_files")
             
             # Call the create_audio_file function
             audio_output_path = os.path.join(base_file_path, "podcast_audio.mp3")
             create_audio_file(file_path, audio_output_path, second_length=600)
-            
-            # Update status string
-            self.status_string.set("File Saved, Now Transcribing")
-            self.root.update_idletasks()
-
+        
             # Call the create_transcript_file function
             transcript_output_path = os.path.join(base_file_path, "podcast_transcript.txt")
             transcript_result = create_transcript_file(audio_output_path, transcript_output_path)
@@ -93,23 +101,17 @@ class MainApplication:
                 transcript_result = load_transcript_text(transcript_output_path)
                 if transcript_result is None:
                     # If the result is still None, display an error message and return
-                    self.status_string.set("Error: Transcript could not be created")
-                    self.root.update_idletasks()
                     return
             
             self.transcript_text = transcript_result
-            
-            # Update status string
-            self.status_string.set("Transcript Complete, Now Summarizing")
-            self.root.update_idletasks()
 
             # Call the generate_five_bullet_summary_text function with the transcript result
             summary_output_path = os.path.join(base_file_path, "podcast_summary.txt")
             summary_result = generate_five_bullet_summary_text(transcript_result, summary_output_path)
 
             # Update status string
+            self.loading=False
             self.status_string.set("Processing Complete")
-            self.root.update_idletasks()
 
             # Display the summary result below the status string
             self.display_summary_result(summary_result)
@@ -137,10 +139,14 @@ class MainApplication:
         self.reset_button = tk.Button(self.root, text="Reset", command=self.init_ui)
         self.reset_button.pack(pady=20)
 
+
     def send_input(self):
         user_text = self.user_input.get()
         if user_text and len(user_text.split()) <= 100:
             # Limit the user input to 100 words
+            self.loading = True
+            self.start_loading_animation()
+
             user_text = " ".join(user_text.split()[:100])
 
             # Call the backend function with the user input
@@ -153,33 +159,10 @@ class MainApplication:
             response_string = generate_answer_general_query(self.transcript_text, user_text)
             self.response_label.config(text=response_string)
             self.user_input.delete(0, tk.END)
-            # self.display_output(response_string)
 
-        #  # Open a new window to get further input from the user
-        # self.new_window = tk.Toplevel(self.root)
-        # self.new_window.title("General Query")
-        
-        # # Create a Label and Entry widget in the new window
-        # tk.Label(self.new_window, text="Enter your query (up to 200 characters):").pack(pady=10)
-        # self.new_user_input = tk.Entry(self.new_window, width=50)
-        # self.new_user_input.pack(pady=10)
-        
-        # # Create a button to submit the query
-        # tk.Button(self.new_window, text="Submit", command=self.process_general_query).pack(pady=20)
-
-
-    # def process_general_query(self):
-    #     query_text = self.new_user_input.get()
-    #     if query_text and len(query_text) <= 200:
-    #         # Close the new window
-    #         self.new_window.destroy()
-            
-    #         # Call the generate_answer_general_query function and get the response
-    #         response = generate_answer_general_query(self.transcript_text, query_text)
-            
-    #         # Display the response where the initial summary was
-    #         self.summary_label.config(text=response)
-
+            # Update status string
+            self.status_string.set("Processing Complete")
+            self.loading = False
 
 
 if __name__ == "__main__":
