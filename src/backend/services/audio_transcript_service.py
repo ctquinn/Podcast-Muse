@@ -2,9 +2,16 @@ from __future__ import annotations
 
 import openai
 import os
+from dotenv import load_dotenv
+from pathlib import Path
 
-openai.api_key = os.environ.get("OPENAI_API_KEY")
-openai.api_key = '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'
+script_dir = Path(__file__).parent
+project_root = script_dir.parent.parent.parent
+env_path = project_root / '.env'
+load_dotenv(dotenv_path=env_path)
+
+openai_api_key = os.getenv("OPENAI_API_KEY")
+openai.api_key = openai_api_key
 
 def create_transcript_file(audio_path: str, transcript_output_path: str) -> str | None:
     transcript_text = None

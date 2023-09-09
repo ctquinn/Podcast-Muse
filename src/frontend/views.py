@@ -5,13 +5,16 @@ import os
 
 from src.backend.services.audio_edit_service import create_audio_file
 from src.backend.services.audio_transcript_service import create_transcript_file, load_transcript_text
-from src.backend.services.transcript_summary_service import generate_five_bullet_summary_text
+from src.backend.services.transcript_summary_service import generate_five_bullet_summary_text, generate_answer_general_query
 
 class MainApplication:
     def __init__(self, root):
         self.root = root
         self.root.title("Podcast Muse")
         self.root.geometry("400x400")  # Set the initial size of the window
+
+        self.transcript_text = None
+
         self.init_ui()
 
     ########################################
@@ -48,6 +51,22 @@ class MainApplication:
         self.summary_label = tk.Label(self.root, text=summary_result, justify='left')
         self.summary_label.pack(anchor='center', pady=5)
 
+        # Create an input field for user text entry
+        self.user_input = tk.Entry(self.root, width=50)
+        self.user_input.pack(anchor='center', pady=5)
+        
+        # Create a "Send" button to send the user input
+        self.send_button = tk.Button(self.root, text="Send", command=self.send_input)
+        self.send_button.pack(anchor='center', pady=5)
+
+        # Create a label to display the response from the generate_answer_general_query function
+        self.response_label = tk.Label(self.root, text="", justify='center')
+        self.response_label.pack(anchor='center', pady=5)
+
+        # Create a reset button at the bottom of the window
+        self.reset_button = tk.Button(self.root, text="Reset", command=self.reset_app)
+        self.reset_button.pack(anchor='center', pady=5)
+
 
     def upload_file(self):
         file_path = filedialog.askopenfilename()
@@ -78,6 +97,8 @@ class MainApplication:
                     self.root.update_idletasks()
                     return
             
+            self.transcript_text = transcript_result
+            
             # Update status string
             self.status_string.set("Transcript Complete, Now Summarizing")
             self.root.update_idletasks()
@@ -92,6 +113,11 @@ class MainApplication:
 
             # Display the summary result below the status string
             self.display_summary_result(summary_result)
+
+
+    def reset_app(self):
+        self.init_ui()
+
 
 
     ########################################
@@ -113,7 +139,7 @@ class MainApplication:
 
     def send_input(self):
         user_text = self.user_input.get()
-        if user_text:
+        if user_text and len(user_text.split()) <= 100:
             # Limit the user input to 100 words
             user_text = " ".join(user_text.split()[:100])
 
@@ -124,8 +150,36 @@ class MainApplication:
 
             # Assuming your backend function returns a string, you would then display it
             # For demonstration, we are using a hardcoded string
-            response_string = "Response from backend"
-            self.display_output(response_string)
+            response_string = generate_answer_general_query(self.transcript_text, user_text)
+            self.response_label.config(text=response_string)
+            self.user_input.delete(0, tk.END)
+            # self.display_output(response_string)
+
+        #  # Open a new window to get further input from the user
+        # self.new_window = tk.Toplevel(self.root)
+        # self.new_window.title("General Query")
+        
+        # # Create a Label and Entry widget in the new window
+        # tk.Label(self.new_window, text="Enter your query (up to 200 characters):").pack(pady=10)
+        # self.new_user_input = tk.Entry(self.new_window, width=50)
+        # self.new_user_input.pack(pady=10)
+        
+        # # Create a button to submit the query
+        # tk.Button(self.new_window, text="Submit", command=self.process_general_query).pack(pady=20)
+
+
+    # def process_general_query(self):
+    #     query_text = self.new_user_input.get()
+    #     if query_text and len(query_text) <= 200:
+    #         # Close the new window
+    #         self.new_window.destroy()
+            
+    #         # Call the generate_answer_general_query function and get the response
+    #         response = generate_answer_general_query(self.transcript_text, query_text)
+            
+    #         # Display the response where the initial summary was
+    #         self.summary_label.config(text=response)
+
 
 
 if __name__ == "__main__":
