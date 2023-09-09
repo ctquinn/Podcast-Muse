@@ -4,15 +4,16 @@ import openai
 import os
 
 openai.api_key = os.environ.get("OPENAI_API_KEY")
+openai.api_key = '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'
 
-def create_transcript_file(transcript_output_path: str) -> str | None:
+def create_transcript_file(audio_path: str, transcript_output_path: str) -> str | None:
     transcript_text = None
+    print("Looking for audio at: " + audio_path)
     if not os.path.isfile(transcript_output_path):
-        print("Now Converting to Text")
 
-        trunc_audio_load = open(transcript_output_path, "rb")
+        trunc_audio_load = open(audio_path, "rb")
 
-        audio_size = os.path.getsize(transcript_output_path)
+        audio_size = os.path.getsize(audio_path)
         file_size_mb = audio_size / (1024 ** 2)
 
         if file_size_mb < 25:
@@ -35,7 +36,7 @@ def create_transcript_file(transcript_output_path: str) -> str | None:
 
 
 # Loads transcript from file if not already developed above
-def load_trasncript_text(transcript_output_path: str) -> str | None:
+def load_transcript_text(transcript_output_path: str) -> str | None:
     transcript_text = None
     if not transcript_text:
         print("Now Loading Transcript")
@@ -43,7 +44,7 @@ def load_trasncript_text(transcript_output_path: str) -> str | None:
             with open(transcript_output_path, 'r') as f:
                 transcript_text = f.read()
         except FileNotFoundError:
-            print("Trasncript file not found")
+            print("Transcript file not found")
     else:
         print("Transcript already loaded")
 

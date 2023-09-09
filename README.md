@@ -9,7 +9,7 @@ This is a personal project to leverage GPT-related tools to condense the informa
 Before you start, create a virtual environment in the project's root directory (where the `requirements.txt` is located) with the following command:
 
 ```sh
-python -m venv env
+python3 -m venv env
 ```
 
 ### 2: Activate the Virtual Environment
@@ -41,7 +41,7 @@ pip install -r requirements.txt
 To run the basic frontend, use the `main.py` file in the `app` folder:
 
 ```
-python -m src/app/main.py
+python3 -m src.app.main
 ```
 
 
@@ -58,6 +58,5 @@ deactivate
 
 ### License
 
+This project is released under the Unlicense. For more details, see [the Unlicense website](http://unlicense.org/) or the [`UNLICENSE`](UNLICENSE) file in this repository.
 
-
-### Contributing
