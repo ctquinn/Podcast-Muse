@@ -9,14 +9,17 @@ from src.backend.services.transcript_summary_service import generate_five_bullet
 
 class MainApplication:
     def __init__(self, root):
+        # TKinter Class Variables
         self.root = root
         self.root.title("Podcast Muse")
         self.root.geometry("600x600")  # Set the initial size of the window
 
+        # Backend Class Variables
         self.transcript_text = None
         self.loading = False
         self.status_string = None
         self.dot_count = 0
+        self.qa_dict = {}
 
         self.init_ui()
 
@@ -142,21 +145,25 @@ class MainApplication:
 
     def send_input(self):
         user_text = self.user_input.get()
-        if user_text and len(user_text.split()) <= 100:
-            # Limit the user input to 100 words
-            self.loading = True
-            self.start_loading_animation()
+        if not user_text or len(user_text.split()) > 100:
+            return
+        
+        # Limit the user input to 100 words
+        self.loading = True
+        self.start_loading_animation()
 
-            user_text = " ".join(user_text.split()[:100])
-
-            # Call the backend function with the user input
-            # For demonstration, we will print the user input
-            # In your actual implementation, you would call your backend function here
-            print(f"User input: {user_text}")
-
-            # Assuming your backend function returns a string, you would then display it
-            # For demonstration, we are using a hardcoded string
+        user_text = " ".join(user_text.split()[:100])
+        print(f"User input: {user_text}")
+        existing_qa = self.qa_dict.get(user_text)
+        if existing_qa:
+            self.response_label.config(text=existing_qa)
+            self.user_input.delete(0, tk.END)
+            self.loading = False
+            self.status_string.set("Processing Complete")
+        else:
+            # Call for query response
             response_string = generate_answer_general_query(self.transcript_text, user_text)
+            self.qa_dict['user_text'] = response_string
             self.response_label.config(text=response_string)
             self.user_input.delete(0, tk.END)
 
