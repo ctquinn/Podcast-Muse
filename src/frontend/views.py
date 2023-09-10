@@ -121,6 +121,11 @@ class MainApplication:
 
 
     def reset_app(self):
+        self.transcript_text = None
+        self.loading = False
+        self.status_string = None
+        self.dot_count = 0
+        self.qa_dict = {}
         self.init_ui()
 
 
