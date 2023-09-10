@@ -14,6 +14,11 @@ openai_api_key = os.getenv("OPENAI_API_KEY")
 openai.api_key = openai_api_key
 
 def generate_five_bullet_audio_summary(content: str) -> str:
+    """
+    Uses GPT-3 to generate a five bullet summary from the input content
+    :param content: The content to be summarized
+    :return: The summary text (if generated)
+    """
     len_content = len(content)
     content_len_to_grab = min(len_content, 10000)
 
@@ -30,6 +35,12 @@ def generate_five_bullet_audio_summary(content: str) -> str:
 
 
 def generate_five_bullet_summary_text(transcript_text: str, summary_output_path: str) -> str:
+    """
+    Generates a five bullet summary from the transcript text and exports it to the output path
+    :param transcript_text: The transcript text to be summarized
+    :param summary_output_path: The path to the summary file to be created
+    :return: The summary text (if generated)
+    """
     print("Now Summarizing")
     transcript_summary_text = None
     if not os.path.isfile(summary_output_path):
@@ -50,6 +61,12 @@ def generate_five_bullet_summary_text(transcript_text: str, summary_output_path:
 
 
 def generate_answer_general_query(content: str, query: str) -> str:
+    """
+    Uses GPT-3 to generate an answer to the input query from the input content
+    :param content: The content supplied to the model to answer the query
+    :param query: The query to be answered
+    :return: The answer text (if generated)
+    """
     len_content = len(content)
     content_len_to_grab = min(len_content, 10000)
 
