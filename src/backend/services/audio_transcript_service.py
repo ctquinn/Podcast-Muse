@@ -23,7 +23,7 @@ def create_transcript_file(audio_path: str, transcript_output_path: str) -> str 
     transcript_text = None
     print("Looking for audio at: " + audio_path)
     if not os.path.isfile(transcript_output_path):
-
+        print("Audio Found, Transcribing...")
         trunc_audio_load = open(audio_path, "rb")
 
         audio_size = os.path.getsize(audio_path)

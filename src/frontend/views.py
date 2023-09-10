@@ -3,6 +3,8 @@ from tkinter import filedialog
 
 import os
 
+from src.frontend.utility_functions import parse_and_check_audio_file
+
 from src.backend.services.audio_edit_service import create_audio_file
 from src.backend.services.audio_transcript_service import create_transcript_file, load_transcript_text
 from src.backend.services.transcript_summary_service import generate_five_bullet_summary_text, generate_answer_general_query
@@ -44,7 +46,7 @@ class MainApplication:
         self.upload_button.pack(anchor='center')  # Center the button
 
         # Status String
-        self.status_string = tk.StringVar(value="Status: Waiting for file upload")
+        self.status_string = tk.StringVar(value="Please Upload a File in .mp3, .mp4, .mpeg, .mpga, .m4a, .wav, or .webm format")
         self.status_label = tk.Label(self.root, textvariable=self.status_string)
         self.status_label.pack(anchor='center', pady=5)
     
@@ -84,7 +86,10 @@ class MainApplication:
 
     def upload_file(self):
         file_path = filedialog.askopenfilename()
-        if file_path:
+
+        file_name, file_extension, allowed_extension = parse_and_check_audio_file(file_path)
+
+        if file_path and allowed_extension:
             self.loading = True
             self.status_string.set("Processing")
             self.start_loading_animation()
@@ -92,11 +97,13 @@ class MainApplication:
             base_file_path = os.path.join(os.getcwd(), "resources", "output_files")
             
             # Call the create_audio_file function
-            audio_output_path = os.path.join(base_file_path, "podcast_audio.mp3")
+            audio_output_filename = file_name + "_audio.mp3"
+            audio_output_path = os.path.join(base_file_path, audio_output_filename)
             create_audio_file(file_path, audio_output_path, second_length=600)
         
             # Call the create_transcript_file function
-            transcript_output_path = os.path.join(base_file_path, "podcast_transcript.txt")
+            transcript_output_filename = file_name + "_transcript.txt"
+            transcript_output_path = os.path.join(base_file_path, transcript_output_filename)
             transcript_result = create_transcript_file(audio_output_path, transcript_output_path)
             
             if transcript_result is None:
@@ -109,7 +116,8 @@ class MainApplication:
             self.transcript_text = transcript_result
 
             # Call the generate_five_bullet_summary_text function with the transcript result
-            summary_output_path = os.path.join(base_file_path, "podcast_summary.txt")
+            summary_output_filename = file_name + "_summary.txt"
+            summary_output_path = os.path.join(base_file_path, summary_output_filename)
             summary_result = generate_five_bullet_summary_text(transcript_result, summary_output_path)
 
             # Update status string
@@ -118,6 +126,9 @@ class MainApplication:
 
             # Display the summary result below the status string
             self.display_summary_result(summary_result)
+
+        else:
+            self.status_string.set("Invalid File: Please upload a .mp3, .mp4, .mpeg, .mpga, .m4a, .wav, or .webm")
 
 
     def reset_app(self):
@@ -168,7 +179,7 @@ class MainApplication:
         else:
             # Call for query response
             response_string = generate_answer_general_query(self.transcript_text, user_text)
-            self.qa_dict['user_text'] = response_string
+            self.qa_dict[user_text] = response_string
             self.response_label.config(text=response_string)
             self.user_input.delete(0, tk.END)
 
