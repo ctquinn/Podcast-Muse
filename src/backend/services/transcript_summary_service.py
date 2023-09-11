@@ -43,13 +43,18 @@ def generate_five_bullet_summary_text(transcript_text: str, summary_output_path:
     """
     print("Now Summarizing")
     transcript_summary_text = None
+    all_tokens = transcript_text.split()
+    first_2000_tokens = all_tokens[:2000]
+    resulting_tokens = ' '.join(first_2000_tokens)
+
     if not os.path.isfile(summary_output_path):
-        transcript_summary = generate_five_bullet_audio_summary(transcript_text)
+        transcript_summary = generate_five_bullet_audio_summary(resulting_tokens)
         transcript_summary_text = transcript_summary['choices'][0]['message']['content']
         
         # print(transcript_summ_tester)
         print("Now Saving Summary")
-        with open(summary_output_path, 'w') as f:
+        summary_output_final_path = os.path.join(summary_output_path, "bullet_summary.txt")
+        with open(summary_output_final_path, 'w') as f:
             f.write(transcript_summary_text)
         print("Done with 5 Bullet Summary")
     else:
@@ -70,11 +75,15 @@ def generate_answer_general_query(content: str, query: str) -> str:
     len_content = len(content)
     content_len_to_grab = min(len_content, 10000)
 
-    trimmed_content = content[:len_content]
+    all_tokens = content.split()
+    first_2000_tokens = all_tokens[:2000]
+    resulting_tokens = ' '.join(first_2000_tokens)
+
+    # trimmed_content = content[:len_content]
     completion_response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
-            {"role": "system", "content": f"You are an expert in answering questions about the following text: {trimmed_content}"},
+            {"role": "system", "content": f"You are an expert in answering questions about the following text: {resulting_tokens}"},
             {"role": "user", "content": f': "Answer the following in 100 words or less: "{query}"'},
         ]
     )

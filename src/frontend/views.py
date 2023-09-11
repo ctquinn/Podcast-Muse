@@ -5,8 +5,8 @@ import os
 
 from src.frontend.utility_functions import parse_and_check_audio_file
 
-from src.backend.services.audio_edit_service import create_audio_file
-from src.backend.services.audio_transcript_service import create_transcript_file, load_transcript_text
+from src.backend.services.audio_edit_service import create_audio_file_stub, create_audio_files
+from src.backend.services.audio_transcript_service import create_transcript_file_stub, create_combined_transcript_file, load_transcript_text
 from src.backend.services.transcript_summary_service import generate_five_bullet_summary_text, generate_answer_general_query
 
 class MainApplication:
@@ -98,17 +98,24 @@ class MainApplication:
             
             # Call the create_audio_file function
             audio_output_filename = file_name + "_audio.mp3"
-            audio_output_path = os.path.join(base_file_path, audio_output_filename)
-            create_audio_file(file_path, audio_output_path, second_length=600)
+            # audio_output_path = os.path.join(base_file_path, audio_output_filename)
+            audio_output_path = os.path.join(base_file_path, file_name)
+            # audio_output_list = create_audio_files(file_path, base_file_path, file_name)
+            audio_output_list = create_audio_files(file_path, audio_output_path)
+            # create_audio_file(file_path, audio_output_path, second_length=600)
         
             # Call the create_transcript_file function
             transcript_output_filename = file_name + "_transcript.txt"
-            transcript_output_path = os.path.join(base_file_path, transcript_output_filename)
-            transcript_result = create_transcript_file(audio_output_path, transcript_output_path)
+            transcript_output_filename = file_name
+            # transcript_output_path = os.path.join(base_file_path, transcript_output_filename)
+            transcript_output_path = audio_output_path
+            transcript_result = create_combined_transcript_file(audio_output_list, transcript_output_path)
+            # transcript_result = create_transcript_file(audio_output_path, transcript_output_path)
             
             if transcript_result is None:
                 # If the result is None, call the load_transcript_text function
-                transcript_result = load_transcript_text(transcript_output_path)
+                transcript_possible_path = os.path.join(audio_output_path, "transcript.txt")
+                transcript_result = load_transcript_text(transcript_possible_path)
                 if transcript_result is None:
                     # If the result is still None, display an error message and return
                     return
@@ -118,7 +125,7 @@ class MainApplication:
             # Call the generate_five_bullet_summary_text function with the transcript result
             summary_output_filename = file_name + "_summary.txt"
             summary_output_path = os.path.join(base_file_path, summary_output_filename)
-            summary_result = generate_five_bullet_summary_text(transcript_result, summary_output_path)
+            summary_result = generate_five_bullet_summary_text(transcript_result, audio_output_path)
 
             # Update status string
             self.loading=False
