@@ -7,7 +7,7 @@ from src.frontend.utility_functions import parse_and_check_audio_file
 
 from src.backend.services.audio_edit_service import create_audio_file_stub, create_audio_files
 from src.backend.services.audio_transcript_service import create_transcript_file_stub, create_combined_transcript_file, load_transcript_text
-from src.backend.services.transcript_summary_service import generate_five_bullet_summary_text, generate_answer_general_query
+from src.backend.services.transcript_summary_service import generate_five_bullet_summary_text, generate_answer_general_query, generate_full_text_summary
 
 class MainApplication:
     def __init__(self, root):
@@ -125,7 +125,8 @@ class MainApplication:
             # Call the generate_five_bullet_summary_text function with the transcript result
             summary_output_filename = file_name + "_summary.txt"
             summary_output_path = os.path.join(base_file_path, summary_output_filename)
-            summary_result = generate_five_bullet_summary_text(transcript_result, audio_output_path)
+            summary_result = generate_full_text_summary(transcript_result, audio_output_path)
+            # summary_result = generate_five_bullet_summary_text(transcript_result, audio_output_path)
 
             # Update status string
             self.loading=False
